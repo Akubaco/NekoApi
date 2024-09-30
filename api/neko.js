@@ -87,6 +87,7 @@ module.exports = async (req, res) => {
             dataFractions.push(dataFraction); 
         }
     });
+    //Update
 
     res.status(200).json({ data: dataFractions });
 };
