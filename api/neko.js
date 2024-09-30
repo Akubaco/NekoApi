@@ -67,10 +67,12 @@ module.exports = async (req, res) => {
         }
     });
 
+    const removeDuplicateHref = Array.from(new Set(resulthref.map(JSON.stringify))).map(JSON.parse);
+    
     const uniqueTitles = new Set();
     const dataFractions = []; 
 
-    resulthref.forEach((fraction, index) => {
+    removeDuplicateHref.forEach((fraction, index) => {
         const title = fraction[2]; 
         const video = fraction[1]; 
 
@@ -80,14 +82,33 @@ module.exports = async (req, res) => {
             const dates = allDates[index] || null;
             const dataFraction = {
                 title: title,
-                video: hostname + '/' + 'vid?=' + video,
+                video: hostname + '/api/neko.js?' + 'vid=' + video,
                 image: image,
                 uploaded: dates,
             };
             dataFractions.push(dataFraction); 
         }
     });
-    //Update
 
+    const video_replace = /<iframe src="(.*?)"/gs;
+
+    if (queryObject.vid != undefined) {
+        result = await curl('https://nekopoi.care/' + queryObject.vid + '/');
+        
+
+        const videoDataFractions = [];
+        let match_video;
+        let count = 1; 
+        while ((match_video = video_replace.exec(result)) !== null) {
+            videoDataFractions.push({
+                [`${count}`]: match_video[1],
+            });
+            count++;
+        }
+      
+        return res.status(200).json({ data: videoDataFractions });
+    }
+
+   
     res.status(200).json({ data: dataFractions });
 };
