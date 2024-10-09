@@ -18,6 +18,17 @@ async function curl(targetUrl) {
 }
 
 module.exports = async (req, res) => {
+    // Set CORS headers
+    res.setHeader('Access-Control-Allow-Origin', '*'); // Allow all origins, adjust this in production
+    res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS'); // Allow specific methods
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type'); // Allow specific headers
+
+    // Handle preflight request for CORS
+    if (req.method === 'OPTIONS') {
+        res.status(204).end(); // No content for preflight requests
+        return;
+    }
+
     const hostname = req.headers.host; 
     const queryObject = url.parse(req.url, true).query;
 
@@ -95,7 +106,6 @@ module.exports = async (req, res) => {
     if (queryObject.vid != undefined) {
         result = await curl('https://nekopoi.care/' + queryObject.vid + '/');
         
-
         const videoDataFractions = [];
         let match_video;
         let count = 1; 
@@ -109,6 +119,5 @@ module.exports = async (req, res) => {
         return res.status(200).json({ data: videoDataFractions });
     }
 
-   
     res.status(200).json({ data: dataFractions });
 };
